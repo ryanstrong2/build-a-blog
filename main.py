@@ -33,25 +33,39 @@ class Handler(webapp2.RequestHandler):
         return t.render(params)
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
+    def renderError(self, error_code):
+        self.error(error_code)
+        self.response.write("Hey! Don't do that!")
 class Blog(db.Model):
     title = db.StringProperty(required = True)
     body = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
-class ViewPostHandler(Handler):
-    def get(self): #blog_id):
-        # blog=self.request.get("blog_link")
-        # blog_link = Blog.get_by_id(int(blog_id))
-        # if not blog:
-        #     self.renderError(404)
+    last_mod = db.DateTimeProperty(auto_now = True)
+    # def render(self):
+    #     # self._render_text = self.content.replace('\n',<br>)
+    #     return render_str("post.html", p = self)
+    # def get(self):
+    #     t = jinja_env.get_template()
+    #     return t.render(params)
+    # def post(self):
 
-        t = jinja_env.get_template("/newpost.html")
-        # content = t.render(blog=blog)
-        self.response.write(t)
+class ViewPostHandler(Handler):
+    def post(self):
+        blog =self.request.get("created")
+        blog_link = Blog.get_by_id(int(created))
+        if not blog:
+            self.renderError(404)
+        escaped_title
+        blog.put()
+        t = jinja_env.get_template("blog.html")
+        content = t.render(blog = blog)
+        self.response.write(content)
+
   # permalink
 class NewPost(Handler):
     def get(self):
-        self.write()
-class MainPage(Handler):
+        self.write(post.html)
+class Base(Handler):
     def render_base(self, title="", body="", error=""):
         blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
         self.render("base.html", title=title, body=body, error=error, blog=blog)
@@ -69,14 +83,15 @@ class MainPage(Handler):
         else:
             error = "Need title and body"
             self.render_base(title, body, error)
-# class ViewPostHandler(Handler):
+# class ViewPostHandler(webapp2.RequestHandler):
 #     def get (self, id):
-#         self.redirect("/newpost.html")
+#         self.redirect("/blog.html")
 
 
 app = webapp2.WSGIApplication([
-    # ('/newpost', PostHandler),
-    ('/', MainPage),
-    ('/newpost.html', ViewPostHandler),
-    webapp2.Route('.blog/<blog_id:\d+>',ViewPostHandler)
+    # ('/', PostHandler),
+    ('/', Base),
+    ('/blog', ViewPostHandler),
+    ('/post', NewPost),
+    webapp2.Route('/blog/<created:\d+>', ViewPostHandler)
 ], debug=True)

@@ -53,14 +53,14 @@
             <a href="/">Build-a-Blog</a>
         </h1>
         <h6>
-            <a href="/newpost.html">New Post</a>
+            <!-- <a href="/blog.html">New Post</a> -->
         </h6>
 
         <hr>
         {% for body in blog %}
             <div class="body">
                 <h2>
-                    <div class="body-title">{{body.title}}</div>
+                    <a href="/blog.html/post.key().id()">{{body.title}}</a>
                 </h2>
                 <pre class="blog-body">{{body.body}}</pre>
             </div>
