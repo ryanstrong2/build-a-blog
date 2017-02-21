@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
+import os, cgi
 import webapp2
 
 import jinja2
@@ -41,34 +41,54 @@ class Blog(db.Model):
     body = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     last_mod = db.DateTimeProperty(auto_now = True)
-    # def render(self):
-    #     # self._render_text = self.content.replace('\n',<br>)
-    #     return render_str("post.html", p = self)
-    # def get(self):
-    #     t = jinja_env.get_template()
-    #     return t.render(params)
-    # def post(self):
+class ViewPostHandler(webapp2.RequestHandler):
 
-class ViewPostHandler(Handler):
-    def post(self):
-        blog =self.request.get("created")
-        blog_link = Blog.get_by_id(int(created))
-        if not blog:
-            self.renderError(404)
-        escaped_title
-        blog.put()
+    def get(self, id="" ):
+        # body = self.request.get("body")
+        blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
+        # # num = Blog.key(bi).id()
         t = jinja_env.get_template("blog.html")
-        content = t.render(blog = blog)
+        # id = Blog.get_by_id(blog)
+        content = t.render(id=id)
+        # last = Blog.get_by_id(key().id())
+        # db.GqlQuery("SELECT * FROM Blog ORDER BY last_mod")
+
         self.response.write(content)
+class ViewPost(Handler):
+    def render_base(self, title="", body="", error=""):
+        blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
+        self.render("blog.html", title=title, blog = blog, error=error)
+
+    def get(self):
+        self.render_base()
 
   # permalink
 class NewPost(Handler):
+    def renderform(self, title= "", body="", error=""):
+        # t = jinja_env.get_template("newpost.html")
+        # content = t.render(title=title, body=body, error=error)
+        self.render("newpost.html", title=title, body=body, error=error)
     def get(self):
-        self.write(post.html)
+        """Display post page as seen in login in flicklist"""
+        self.renderform()
+
+    def post(self):
+        title = self.request.get("title")
+        body = self.request.get("body")
+        link =self.request.get("last_mod")
+
+        if title and body:
+            b = Blog(title = title, body = body)
+            b.put()
+            self.redirect("/blog")
+        else:
+            error = "Need title and body"
+            self.renderform(title, body, error)
+
 class Base(Handler):
     def render_base(self, title="", body="", error=""):
-        blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
-        self.render("base.html", title=title, body=body, error=error, blog=blog)
+        blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
+        self.render("base.html", title=title, blog = blog, error=error)
 
     def get(self):
         self.render_base()
@@ -79,19 +99,15 @@ class Base(Handler):
         if title and body:
             b = Blog(title = title, body = body)
             b.put()
-            self.redirect("/")
+            self.redirect("/blog")
         else:
             error = "Need title and body"
             self.render_base(title, body, error)
-# class ViewPostHandler(webapp2.RequestHandler):
-#     def get (self, id):
-#         self.redirect("/blog.html")
-
 
 app = webapp2.WSGIApplication([
     # ('/', PostHandler),
     ('/', Base),
-    ('/blog', ViewPostHandler),
-    ('/post', NewPost),
-    webapp2.Route('/blog/<created:\d+>', ViewPostHandler)
+    ('/blog', ViewPost),
+    ('/newpost', NewPost),
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
 ], debug=True)

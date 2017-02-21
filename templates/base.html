@@ -48,31 +48,23 @@
           font-size: 17px;
       }
     </style>
-    <body>
+
         <h1>
-            <a href="/">Build-a-Blog</a>
+            Build-a-Blog
         </h1>
-        <h6>
-            <!-- <a href="/blog.html">New Post</a> -->
-        </h6>
 
         <hr>
-        {% for body in blog %}
-            <div class="body">
-                <h2>
-                    <a href="/blog.html/post.key().id()">{{body.title}}</a>
-                </h2>
-                <pre class="blog-body">{{body.body}}</pre>
-            </div>
-        {% endfor %}
-
-        <!-- <ul>
-            <li><a href="/">Main</a></li>
-            <li><a href="/newpost">New Post</a></li>
-        </ul> -->
-<!--
         {% block content %}
-        {% endblock %} -->
+        {% endblock %}
+    <body>
+        {% for body in blog %}
+        <div class="body">
+            <h2>
+                <a href="/blog/{{body.key().id()}}"> {{body.title}} </a>
+            </h2>
+            <pre class="blog-body">{{body.body}}</pre>
+        </div>
+        {% endfor %}
 
     </body>
 </html>
