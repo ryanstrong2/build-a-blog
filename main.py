@@ -59,10 +59,11 @@ class ViewPostHandler(Handler):
     def get (self,id):
         blog = Blog.get_by_id(int(id))
         if blog:
+            blogs = [blog]
             t = jinja_env.get_template("blog.html")
-            response = t.render(blog=blog)
+            response = t.render(blog=blogs)
         else:
-            error = "WHY?! no %s" % id
+            error = "ERROR no %s" % id
             t = jinja_env.get_template("base.html")
             response = t.render(error=error)
         self.response.out.write(response)
