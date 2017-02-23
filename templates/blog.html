@@ -1,21 +1,16 @@
-{% extends "base.html" %}
-
-
-<head>
-    <h1>
-    <title>Blog</title>
-    </h1>
-</head>
+{% extends 'base.html' %}
 {% block content %}
-<hr>
+
+<h1>
+Blog
+</h1>
+
 {% for body in blog %}
-<body>
-    <div class="body">
-        <h2>
-            <a href="/blog/{{body.key().id()}}">{{body.title}}</a>
-        </h2>
-        <pre class="blog-body">{{body.body}}</pre>
-    </div>
-</body>
+
+<h2>
+    <a href="/blog/{{ body.key().id() }}">{{ body.title }}</a>
+</h2>
+<pre class="blog-body">{{body.body}}</pre>
+
 {% endfor %}
 {% endblock %}

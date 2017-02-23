@@ -41,23 +41,35 @@ class Blog(db.Model):
     body = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     last_mod = db.DateTimeProperty(auto_now = True)
-class ViewPostHandler(webapp2.RequestHandler):
-
-    def get(self, id="" ):
-        # body = self.request.get("body")
-        blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC")
-        # # num = Blog.key(bi).id()
-        t = jinja_env.get_template("blog.html")
-        # id = Blog.get_by_id(blog)
-        content = t.render(id=id)
-        # last = Blog.get_by_id(key().id())
-        # db.GqlQuery("SELECT * FROM Blog ORDER BY last_mod")
-
-        self.response.write(content)
+class ViewPostHandler(Handler):
+    # def write(self, *a, **kw):
+    #     self.response.out.write(*a, **kw)
+    #
+    # def render_str(self, template, **params):
+    #     t=jinja_env.get_template(template)
+    #     return t.render(params)
+    # def render(self, template, **kw):
+    #     self.write(self.render_str(template, **kw))
+    # def renderError(self, error_code):
+    #     self.error(error_code)
+    #     self.response.write("Hey! Don't do that!")
+    # def render_base(self, title="", body="", error=""):
+    #     blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
+    #     self.render("blog.html",  blog = blog, error=error)
+    def get (self,id):
+        blog = Blog.get_by_id(int(id))
+        if blog:
+            t = jinja_env.get_template("blog.html")
+            response = t.render(blog=blog)
+        else:
+            error = "WHY?! no %s" % id
+            t = jinja_env.get_template("base.html")
+            response = t.render(error=error)
+        self.response.out.write(response)
 class ViewPost(Handler):
     def render_base(self, title="", body="", error=""):
         blog = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 5")
-        self.render("blog.html", title=title, blog = blog, error=error)
+        self.render("blog.html",  blog = blog, error=error)
 
     def get(self):
         self.render_base()
@@ -65,9 +77,9 @@ class ViewPost(Handler):
   # permalink
 class NewPost(Handler):
     def renderform(self, title= "", body="", error=""):
-        # t = jinja_env.get_template("newpost.html")
-        # content = t.render(title=title, body=body, error=error)
-        self.render("newpost.html", title=title, body=body, error=error)
+        t = jinja_env.get_template("newpost.html")
+        content = t.render(title=title, body=body, error=error)
+        self.response.out.write(content)
     def get(self):
         """Display post page as seen in login in flicklist"""
         self.renderform()
@@ -75,12 +87,13 @@ class NewPost(Handler):
     def post(self):
         title = self.request.get("title")
         body = self.request.get("body")
-        link =self.request.get("last_mod")
+        # link =self.request.get("last_mod")
 
         if title and body:
             b = Blog(title = title, body = body)
             b.put()
-            self.redirect("/blog")
+            id = b.key().id()
+            self.redirect("/blog/%s" % id)
         else:
             error = "Need title and body"
             self.renderform(title, body, error)
@@ -105,9 +118,8 @@ class Base(Handler):
             self.render_base(title, body, error)
 
 app = webapp2.WSGIApplication([
-    # ('/', PostHandler),
     ('/', Base),
     ('/blog', ViewPost),
     ('/newpost', NewPost),
-    webapp2.Route('/blog/<id:\d+>', ViewPostHandler)
+    webapp2.Route('/blog/<id:\d+>',  ViewPostHandler, name='blogid')
 ], debug=True)
